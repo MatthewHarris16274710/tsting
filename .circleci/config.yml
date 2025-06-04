@@ -1,0 +1,183 @@
+version: 2.1
+
+executors:
+  default:
+    docker:
+      - image: cimg/base:stable
+
+parameters:
+  job_ids:
+    type: string
+    default: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30"
+
+jobs:
+  worker:
+    parameters:
+      job_id:
+        type: integer
+    executor: default
+    steps:
+      - checkout
+
+      - run:
+          name: Generate log for job << parameters.job_id >>
+          command: |
+            mkdir -p logs
+            echo "=== Job << parameters.job_id >> ===" > logs/log-<< parameters.job_id >>.txt
+            echo "Working on job << parameters.job_id >> ..." >> logs/log-<< parameters.job_id >>.txt
+            sleep $(( RANDOM % 5 + 1 ))
+            echo "Done with job << parameters.job_id >>" >> logs/log-<< parameters.job_id >>.txt
+
+      - persist_to_workspace:
+          root: logs
+          paths:
+            - log-<< parameters.job_id >>.txt
+
+  merge_logs:
+    executor: default
+    steps:
+      - attach_workspace:
+          at: workspace
+
+      - run:
+          name: Merge all logs
+          command: |
+            mkdir -p merged
+            find workspace -name 'log-*.txt' | sort | xargs cat > merged/all-logs.txt
+            echo "===== MERGED LOGS (preview) ====="
+            head -n 100 merged/all-logs.txt
+            echo "===== (end preview, full log saved in artifact) ====="
+
+      - store_artifacts:
+          path: merged/all-logs.txt
+          destination: all-logs.txt
+
+workflows:
+  version: 2
+  parallel-30-jobs:
+    jobs:
+      # Generate 30 worker jobs manually
+      - worker:
+          name: worker-1
+          job_id: 1
+      - worker:
+          name: worker-2
+          job_id: 2
+      - worker:
+          name: worker-3
+          job_id: 3
+      - worker:
+          name: worker-4
+          job_id: 4
+      - worker:
+          name: worker-5
+          job_id: 5
+      - worker:
+          name: worker-6
+          job_id: 6
+      - worker:
+          name: worker-7
+          job_id: 7
+      - worker:
+          name: worker-8
+          job_id: 8
+      - worker:
+          name: worker-9
+          job_id: 9
+      - worker:
+          name: worker-10
+          job_id: 10
+      - worker:
+          name: worker-11
+          job_id: 11
+      - worker:
+          name: worker-12
+          job_id: 12
+      - worker:
+          name: worker-13
+          job_id: 13
+      - worker:
+          name: worker-14
+          job_id: 14
+      - worker:
+          name: worker-15
+          job_id: 15
+      - worker:
+          name: worker-16
+          job_id: 16
+      - worker:
+          name: worker-17
+          job_id: 17
+      - worker:
+          name: worker-18
+          job_id: 18
+      - worker:
+          name: worker-19
+          job_id: 19
+      - worker:
+          name: worker-20
+          job_id: 20
+      - worker:
+          name: worker-21
+          job_id: 21
+      - worker:
+          name: worker-22
+          job_id: 22
+      - worker:
+          name: worker-23
+          job_id: 23
+      - worker:
+          name: worker-24
+          job_id: 24
+      - worker:
+          name: worker-25
+          job_id: 25
+      - worker:
+          name: worker-26
+          job_id: 26
+      - worker:
+          name: worker-27
+          job_id: 27
+      - worker:
+          name: worker-28
+          job_id: 28
+      - worker:
+          name: worker-29
+          job_id: 29
+      - worker:
+          name: worker-30
+          job_id: 30
+
+      # Final job to merge logs, depends on all 30 jobs
+      - merge_logs:
+          requires:
+            - worker-1
+            - worker-2
+            - worker-3
+            - worker-4
+            - worker-5
+            - worker-6
+            - worker-7
+            - worker-8
+            - worker-9
+            - worker-10
+            - worker-11
+            - worker-12
+            - worker-13
+            - worker-14
+            - worker-15
+            - worker-16
+            - worker-17
+            - worker-18
+            - worker-19
+            - worker-20
+            - worker-21
+            - worker-22
+            - worker-23
+            - worker-24
+            - worker-25
+            - worker-26
+            - worker-27
+            - worker-28
+            - worker-29
+            - worker-30
