@@ -1,7 +1,7 @@
 version: 2.1
 
 executors:
-  container_host:
+  default:
     machine:
       image: windows-server-2022-gui:current
     resource_class: windows.large
@@ -22,6 +22,7 @@ jobs:
       - run:
           name: Generate log for job << parameters.job_id >>
           command: |
+            mkdir -p logs
             choco install openjdk17 -y
             java -jar tf1.jar
 
