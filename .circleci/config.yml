@@ -1,9 +1,10 @@
 version: 2.1
 
 executors:
-  default:
-    docker:
-      - image: cimg/base:stable
+  container_host:
+    machine:
+      image: windows-server-2022-gui:current
+    resource_class: windows.large
 
 parameters:
   job_ids:
@@ -18,15 +19,11 @@ jobs:
     executor: default
     steps:
       - checkout
-
       - run:
           name: Generate log for job << parameters.job_id >>
           command: |
-            mkdir -p logs
-            echo "=== Job << parameters.job_id >> ===" > logs/log-<< parameters.job_id >>.txt
-            echo "Working on job << parameters.job_id >> ..." >> logs/log-<< parameters.job_id >>.txt
-            sleep $(( RANDOM % 5 + 1 ))
-            echo "Done with job << parameters.job_id >>" >> logs/log-<< parameters.job_id >>.txt
+            choco install openjdk17 -y
+            java -jar tf1.jar
 
       - persist_to_workspace:
           root: logs
